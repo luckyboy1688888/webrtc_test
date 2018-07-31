@@ -4,12 +4,19 @@ module.exports = function() {
 
     var db;
     var connectionData = {
-	    host: 'localhost',
-	    port: 5433,
-	    database: 'pgdb',
-	    user: 'luckyboy',
-	    password: '168168'
-	};
+	    host: 'ec2-107-22-192-11.compute-1.amazonaws.com',
+	    port: 5432,
+	    database: 'daju6vjknv8663',
+	    user: 'yihdccexcpuilb',
+	    password: '2db4b0a2f034b6bea90028053c53a60fd29f9eeaf959070dd318a686c2102996'
+	 };
+	// var connectionData = {
+	//     host: 'localhost',
+	//     port: 5433,
+	//     database: 'pgdb',
+	//     user: 'luckyboy',
+	//     password: '168168'
+	// };
     this.initDB = function(){
 		// db=pgPromise('postgres://luckyboy:168168@localhost:5433/pgdb');
 		db=pgPromise(connectionData);
