@@ -5,6 +5,7 @@ var fs 			= require("fs");
 var http 		= require('http');
 var path 		= require("path");
 
+const SERVERPORT=8080;
 
 ////////custom class 
 var socket_manager = require("./server/socket_manager/socket_manager.js");
@@ -23,8 +24,8 @@ app.get("/ui", function(req, res){
 });
 
 
-server.listen(8001,function(){
-	console.log("Server up and running at %s port", 8001);
+server.listen(SERVERPORT,function(){
+	console.log("Server up and running at %s port", SERVERPORT);
 });
 
 
