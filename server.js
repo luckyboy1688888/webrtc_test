@@ -1,11 +1,10 @@
 ////////third module
 var express 	= require("express");
 var fs 			= require("fs");
-//var http 		= require('http');
-var http 		= require('http');
+var https 		= require('http');
 var path 		= require("path");
 
-const SERVERPORT=8080;
+const SERVERPORT = process.env.PORT || 8001;
 
 ////////custom class 
 var socket_manager = require("./server/socket_manager/socket_manager.js");
@@ -14,7 +13,7 @@ var db_helper = require("./server/db_helper/db_helper.js");
 var app = express();
 
 app.use(express.static('public'));
-var server = http.createServer(app);
+var server = https.createServer(app);
 app.get("/ipc", function(req, res){
 	res.sendFile("public/view/ipc.html",{ root: __dirname });
 });
@@ -30,8 +29,8 @@ server.listen(SERVERPORT,function(){
 
 
 ///////setup pgdb
-var db_helper = new db_helper();
-db_helper.initDB();
+//var db_helper = new db_helper();
+//db_helper.initDB();
 // setTimeout(function(){
 // 	db_helper.queryData('select * from users');
 // }, 1500, 'funky');
