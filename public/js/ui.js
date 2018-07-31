@@ -172,7 +172,7 @@ var remoteSdpArray=[];
 
 function fRemoteStreamRemoved(event) {
     console.log('remote stream removed');
-    remoteVideo_UI.src = '';
+    //remoteVideo_UI.src = '';
 }
 
 var gRemoteStream;
