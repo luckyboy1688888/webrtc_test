@@ -1,0 +1,21 @@
+<html>
+<head>
+    <link rel="stylesheet" href="/lib/boostrap/dist/css/bootstrap.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/lib/webrtc-adapter/release/adapter.js"></script>
+    <script src="/lib/jquery/dist/jquery.js"></script>
+    <!--<script src="/lib/popper.js/dist/popper.js"></script>-->
+    <script src="/lib/boostrap/dist/js/bootstrap.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/ipc.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <h1>IPC VIEW</h1>
+    <div>
+        <button id="bt_connect" onclick="startConnection()">connect</button>
+    </div>
+    <video id="localVideo" autoplay width="80%"></video>
+</div>
+</body>
+</html>

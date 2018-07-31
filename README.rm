@@ -1,0 +1,3 @@
+1.switch node to v6.10.0 :nvm install v6.10.0
+2.run pgdb : pg_ctl -D pgdb -o "-F -p 5433" start
+3.run node server :node server.js
