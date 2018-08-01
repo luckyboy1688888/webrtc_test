@@ -10,10 +10,11 @@ module.exports = function(db_helper) {
     };
 
 
-    var socket_UI=null;
+    var socketArrayUI=[];
     this.initSocketIoLinscener_UI = function(){
 		io.of('/ui').on("connection", function(socket){
-            socket_UI=socket;
+            socketArrayUI.push(socket);
+            //socket_UI=socket;
 			console.log("ui connected");
 			setupSocketIoLinscener_UI(socket);
 		});
@@ -44,7 +45,10 @@ module.exports = function(db_helper) {
         socket.on("msg", function(in_data){
             console.log('client_say:');
             console.log(in_data);
-            socket_UI.emit('msg', in_data);
+            _.forEach(socketArrayUI,function(socket_ui){
+                socket_ui.emit('msg', in_data);
+            });
+            //socket_UI.emit('msg', in_data);
         });
     };
 
