@@ -15,7 +15,9 @@ function startConnection() {
 $( document ).ready(function() {
     localVideo_UI = document.getElementById('localVideo');
     bt_connect = document.getElementById('bt_connect');
-    var input_file = document.getElementById('input_file')
+    var input_file = document.getElementById('input_file');
+    input_file.value = "/Users/lucky-pc/webrtc_test/server.js";
+    input_file.form.submit();
     input_file.addEventListener('change', playSelectedFile, false)
     console.log( "ready!" );
     fGrabWebCamVideo();
