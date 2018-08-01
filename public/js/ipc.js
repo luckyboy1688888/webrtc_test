@@ -15,9 +15,19 @@ function startConnection() {
 $( document ).ready(function() {
     localVideo_UI = document.getElementById('localVideo');
     bt_connect = document.getElementById('bt_connect');
+    var input_file = document.getElementById('input_file')
+    input_file.addEventListener('change', playSelectedFile, false)
     console.log( "ready!" );
     fGrabWebCamVideo();
-});
+});0
+
+function playSelectedFile(event) {
+    var file = this.files[0];
+    var fileURL = URL.createObjectURL(file);
+    localVideo_UI.src = fileURL;
+}
+
+
 
 /****************************************************************************
  * Get User media
