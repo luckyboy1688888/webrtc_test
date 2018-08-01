@@ -1,8 +1,7 @@
 
 var gbIsInitiator = false;
-var gLocalStream;
 
-var socket = io.connect();
+var socket = io.connect('/ui');
 setupSocketIo();
 
 $( document ).ready(function() {
@@ -18,50 +17,48 @@ function setupSocketIo() {
         console.log('start_course: ', obj);
     });
 
-    socket.on('ready', function (result) {
-        console.log('ready', result);
-        fCreatePeerConnection();
-    });
-
     socket.on('log', function (array) {
         console.log.apply(console, array);
     });
 
-    socket.on('message', function (message) {
-        console.log('Client received message: ' + message.type);
-        fSignalingMessageCallback(message);
+    socket.on('msg', function (msg) {
+        console.log('Client received msg: ' + msg.type);
+        fSignalingMessageCallback(msg);
     });
 }
 
-function fSignalingMessageCallback(message) {
-
+var g_ipc_uuid=null;
+function fSignalingMessageCallback(msg) {
+    g_ipc_uuid=msg.ipc_uuid;
     //////////////////////////////////peer connection//////////////////////////////////////////////////
-    if (message.type === 'renegotiate') {
+    if (msg.data.type === 'renegotiate') {
         fStartConnection();
     }
-    if (message.type === 'offer') {
-        peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, fLogError);
+    if (msg.data.type === 'offer') {
+        peerConn.setRemoteDescription(new RTCSessionDescription(msg.data), function () {}, fLogError);
         peerConn.createAnswer(fOnLocalSessionCreated, fLogError);
-        console.log(message.sdp);
-    } else if (message.type === 'answer') {
+        console.log(msg.data.sdp);
+    } else if (msg.data.type === 'answer') {
         console.log('recieve answer');
-        console.log(message.sdp);
-        peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, fLogError);
+        console.log(msg.data.sdp);
+        peerConn.setRemoteDescription(new RTCSessionDescription(msg.data), function () {}, fLogError);
 
-    } else if (message.type === 'candidate') {
+    } else if (msg.data.type === 'candidate') {
         peerConn.addIceCandidate(new RTCIceCandidate({
-            candidate: message.candidate
+            candidate: msg.data.candidate
         }));
         console.log('recieve candiate');
-        console.log(message.candidate);
-        console.log(message.id);
+        console.log(msg.data.candidate);
+        console.log(msg.data.id);
+    }else if (msg.data.type === 'ready') {
+        fCreatePeerConnection();
     }
 }
 
 
-function fSendToServer(command, parameter) {
+function fSendToServer(data) {
     try {
-        socket.emit(command, parameter);
+        socket.emit('msg', {ipc_uuid:g_ipc_uuid, data:data});
     } catch (err) {
         console.log(command);
         console.log(parameter);
@@ -81,9 +78,6 @@ function fCreatePeerConnection() {
     peerConn.onaddstream = fGetRemoteStream;
     peerConn.onremovestream = fRemoteStreamRemoved;
 
-    if (gLocalStream) {
-        peerConn.addStream(gLocalStream);
-    }
 
     fCreateDataChannel();
 
@@ -107,7 +101,7 @@ function fStartConnection() {
 function fOnLocalSessionCreated(desc) {
     peerConn.setLocalDescription(desc, function () {
         console.log('sending local desc: '+ desc);
-        fSendToServer("message", peerConn.localDescription);
+        fSendToServer(peerConn.localDescription);
         console.log('peerConn.localDescription='+peerConn.localDescription);
     }, fLogError);
 }
@@ -120,7 +114,7 @@ function fRenegotiate() {
     if (gbIsInitiator) {
         fStartConnection();
     } else {
-        fSendToServer('message', {
+        fSendToServer({
             type: 'renegotiate',
         });
     }
@@ -132,7 +126,7 @@ function fRenegotiate() {
 
 function fSendCandidate() {
     if (event.candidate) {
-        fSendToServer('message', {
+        fSendToServer({
             type: 'candidate',
             label: event.candidate.sdpMLineIndex,
             id: event.candidate.sdpMid,
@@ -185,7 +179,7 @@ function fGetRemoteStream(event) {
     video_e.setAttribute("height", "240");
     video_e.autoplay = true;
     video_e.srcObject = gRemoteStream;
-    video_e.load();
+    //video_e.load();
     remoteVideoDiv.appendChild(video_e);
 }
 

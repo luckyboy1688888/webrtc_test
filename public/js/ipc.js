@@ -4,12 +4,12 @@ var bt_connect;
 var gLocalStream;
 var gbIsInitiator = true;
 
-var socket = io.connect();
+var socket = io.connect('/ipc');
 setupSocketIo();
 
 function startConnection() {
-    var data={type:'move', content:{x:1, y:2}};
-    socket.emit('ready', data);
+    fSendToServer({type:'ready'});
+    fCreatePeerConnection();
 }
 
 $( document ).ready(function() {
@@ -49,10 +49,11 @@ function fGrabWebCamVideo() {
 /****************************************************************************
  * setupSocketIo
  ****************************************************************************/
+var g_ipc_uuid=null;
 function setupSocketIo() {
 
-    socket.on('start_course', function (obj) {
-        console.log('start_course: ', obj);
+    socket.on('connect_server', function (res) {
+        g_ipc_uuid=res.ipc_uuid;
     });
 
     socket.on('ready', function (result) {
@@ -64,41 +65,44 @@ function setupSocketIo() {
         console.log.apply(console, array);
     });
 
-    socket.on('message', function (message) {
-        console.log(message);
-        fSignalingMessageCallback(message);
+    socket.on('msg', function (msg) {
+        console.log(msg);
+        fSignalingMessageCallback(msg);
     });
 }
 
-function fSignalingMessageCallback(message) {
+function fSignalingMessageCallback(msg) {
 
     //////////////////////////////////peer connection//////////////////////////////////////////////////
-    if (message.type === 'renegotiate') {
-        fStartConnection();
-    }
-    if (message.type === 'offer') {
-        peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, fLogError);
+    // if (msg.type === 'renegotiate') {
+    //     fStartConnection();
+    // }
+    if (msg.data.type === 'offer') {
+        peerConn.setRemoteDescription(new RTCSessionDescription(msg.data), function () {}, fLogError);
         peerConn.createAnswer(fOnLocalSessionCreated, fLogError);
-        console.log(message.sdp);
-    } else if (message.type === 'answer') {
+        console.log(msg.data.sdp);
+    } else if (msg.data.type === 'answer') {
         console.log('recieve answer');
-        console.log(message.sdp);
-        peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, fLogError);
+        console.log(msg.data.sdp);
+        peerConn.setRemoteDescription(new RTCSessionDescription(msg.data), function () {}, fLogError);
 
-    } else if (message.type === 'candidate') {
+    } else if (msg.data.type === 'candidate') {
         peerConn.addIceCandidate(new RTCIceCandidate({
-            candidate: message.candidate
+            candidate: msg.data.candidate
         }));
         console.log('recieve candiate');
-        console.log(message.candidate);
-        console.log(message.id);
+        console.log(msg.data.candidate);
+        console.log(msg.data.id);
     }
+    // else if (msg.type === 'ready') {
+    //     fCreatePeerConnection();
+    // }
 }
 
 
-function fSendToServer(command, parameter) {
+function fSendToServer(parameter) {
     try {
-        socket.emit(command, parameter);
+        socket.emit('msg', {ipc_uuid:g_ipc_uuid, data:parameter});
     } catch (err) {
         console.log(command);
         console.log(parameter);
@@ -142,7 +146,7 @@ function fStartConnection() {
 function fOnLocalSessionCreated(desc) {
     peerConn.setLocalDescription(desc, function () {
         console.log('sending local desc: '+desc);
-        fSendToServer("message", peerConn.localDescription);
+        fSendToServer(peerConn.localDescription);
         console.log('peerConn.localDescription='+peerConn.localDescription);
     }, fLogError);
 }
@@ -155,7 +159,7 @@ function fRenegotiate() {
     if (gbIsInitiator) {
         fStartConnection();
     } else {
-        fSendToServer('message', {
+        fSendToServer({
             type: 'renegotiate',
         });
     }
@@ -167,7 +171,7 @@ function fRenegotiate() {
 
 function fSendCandidate() {
     if (event.candidate) {
-        fSendToServer('message', {
+        fSendToServer({
             type: 'candidate',
             label: event.candidate.sdpMLineIndex,
             id: event.candidate.sdpMid,

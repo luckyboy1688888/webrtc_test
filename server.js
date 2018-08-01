@@ -15,11 +15,16 @@ var app = express();
 app.use(express.static('public'));
 var server = https.createServer(app);
 app.get("/ipc", function(req, res){
+    ///////setup socket io
+    Socket_manager.initSocketIoLinscener_IPC();
 	res.sendFile("public/view/ipc.html",{ root: __dirname });
 });
 
 app.get("/ui", function(req, res){
+    ///////setup socket io
+    Socket_manager.initSocketIoLinscener_UI();
     res.sendFile("public/view/ui.html",{ root: __dirname });
+
 });
 
 
@@ -36,10 +41,9 @@ server.listen(SERVERPORT,function(){
 // }, 1500, 'funky');
 
 
-///////setup socket io
 var Socket_manager = new socket_manager(db_helper);
 Socket_manager.setSocketIoServer(server);
-Socket_manager.initSocketIoLinscener();
+
 
 
 
