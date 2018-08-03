@@ -12,6 +12,10 @@ function startConnection() {
     fCreatePeerConnection();
 }
 
+function loadvideo() {
+    readTextFile('file:////Users/lucky-pc/webrtc_test/server.js');
+}
+
 $( document ).ready(function() {
     localVideo_UI = document.getElementById('localVideo');
     bt_connect = document.getElementById('bt_connect');
@@ -28,7 +32,23 @@ function playSelectedFile(event) {
     gLocalStream=localVideo_UI.captureStream();
 }
 
-
+function readTextFile(file)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+                alert(allText);
+            }
+        }
+    }
+    rawFile.send(null);
+}
 
 /****************************************************************************
  * Get User media
